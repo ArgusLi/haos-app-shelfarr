@@ -1,0 +1,36 @@
+name: Shelfarr
+version: "1.0.0"
+slug: shelfarr
+description: Self-hosted ebook & audiobook request/management for the *arr ecosystem
+url: https://github.com/ArgusLi/haos-app-shelfarr
+arch:
+  - aarch64
+  - amd64
+init: false
+startup: application
+boot: auto
+host_network: false
+map:
+  - share:rw
+  - addon_config:rw
+ports:
+  80/tcp: 5056
+ports_description:
+  80/tcp: Shelfarr web UI
+webui: "http://[HOST]:[PORT:80]/"
+options:
+  PUID: 0
+  PGID: 0
+  TZ: UTC
+  RAILS_MASTER_KEY: ""
+  audiobooks_path: /share/shelfarr/audiobooks
+  ebooks_path: /share/shelfarr/ebooks
+  downloads_path: /share/shelfarr/downloads
+schema:
+  PUID: int
+  PGID: int
+  TZ: str
+  RAILS_MASTER_KEY: "str?"
+  audiobooks_path: str
+  ebooks_path: str
+  downloads_path: str
