@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.1
+- Fixed a blank ingress page: nginx/app redirects were being absolutized to the
+  internal ingress port (`:8099`), causing the browser to hit an unexposed port
+  (connection refused). Redirects are now kept path-only (`absolute_redirect off`)
+  and app `Location` headers are rewritten onto the ingress entry (`proxy_redirect`).
+
 ## 1.1.0
 - Added Home Assistant **ingress** (sidebar) support via an nginx layer that maps a
   fixed base path (`/shelfarr`, set with `RAILS_RELATIVE_URL_ROOT`) onto the dynamic

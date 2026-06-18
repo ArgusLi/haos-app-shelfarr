@@ -9,6 +9,12 @@ server {
 
     client_max_body_size 0;
 
+    # Keep nginx-issued redirects relative (path-only). Otherwise nginx absolutizes
+    # them with the Host header (which carries the ingress port), sending the browser
+    # straight at the unexposed ingress port -> connection refused.
+    absolute_redirect off;
+    port_in_redirect off;
+
     # HA opens the add-on at "/"; Rails serves only under the base path, so send
     # the browser to the based path on the live ingress entry.
     location = / {
@@ -30,7 +36,12 @@ server {
         proxy_read_timeout 86400s;
         proxy_send_timeout 86400s;
 
-        # Rewrite the fixed base path in responses to the live ingress entry so
+        # Rewrite app-issued redirect Location headers (absolute or path-only) onto
+        # the live ingress entry, so 302s stay inside the ingress path.
+        proxy_redirect ~^https?://[^/]+(%%base_path%%/.*)$ %%ingress_entry%%$1;
+        proxy_redirect ~^(%%base_path%%/.*)$ %%ingress_entry%%$1;
+
+        # Rewrite the fixed base path in response BODIES to the live ingress entry so
         # all links/assets/cable URLs resolve under the HA ingress path.
         proxy_set_header Accept-Encoding "";
         sub_filter_once off;
