@@ -1,5 +1,5 @@
 name: Shelfarr
-version: "1.0.0"
+version: "1.1.0"
 slug: shelfarr
 description: Self-hosted ebook & audiobook request/management for the *arr ecosystem
 url: https://github.com/ArgusLi/haos-app-shelfarr
@@ -10,14 +10,18 @@ init: false
 startup: application
 boot: auto
 host_network: false
+ingress: true
+ingress_port: 8099
+ingress_stream: true
+panel_icon: mdi:book-music
 map:
   - share:rw
   - addon_config:rw
 ports:
   80/tcp: 5056
 ports_description:
-  80/tcp: Shelfarr web UI
-webui: "http://[HOST]:[PORT:80]/"
+  80/tcp: Shelfarr web UI (direct, served under /shelfarr/)
+webui: "http://[HOST]:[PORT:80]/shelfarr/"
 options:
   PUID: 0
   PGID: 0

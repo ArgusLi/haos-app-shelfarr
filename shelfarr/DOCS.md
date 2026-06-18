@@ -34,7 +34,8 @@ container, adds Home Assistant integration, and stores its data on your HA insta
 
 ## First-run setup
 
-1. After starting, open the web UI via the **OPEN WEB UI** button (or `http://<HA-host>:5056`).
+1. After starting, open the web UI from the **Home Assistant sidebar** (ingress), via the
+   add-on's **OPEN WEB UI** button, or directly at `http://<HA-host>:5056/shelfarr/`.
 2. **Register the first user** — this account automatically becomes the admin.
 3. In **Admin → Settings**, configure:
    - **Indexers** (Prowlarr / Jackett / NZBHydra2 API credentials).
@@ -43,7 +44,19 @@ container, adds Home Assistant integration, and stores its data on your HA insta
      `/downloads` (these map to the `*_path` options above).
    - Optional Audiobookshelf integration, notifications, and OIDC/SSO.
 
+## Web access (ingress + direct port)
+
+This add-on supports both:
+
+- **Ingress** (recommended): open Shelfarr from the HA sidebar — no port needed, authenticated
+  by Home Assistant. An nginx layer serves Shelfarr under a fixed base path (`/shelfarr`) and
+  rewrites it onto HA's dynamic ingress path, including live (websocket) updates.
+- **Direct port `5056`** (fallback): reachable at `http://<HA-host>:5056/shelfarr/`. Note the
+  app now lives under `/shelfarr/`, so the bare `http://<HA-host>:5056/` will 404 — use the
+  WebUI link, which points at the correct path.
+
 ## Notes
 
-- Web access is via the mapped port `5056` (container port `80`). Ingress is not used.
-- Health is checked by Shelfarr at `GET /up`.
+- Because Shelfarr serves under `/shelfarr`, health is checked at `GET /shelfarr/up`.
+- ActionCable request-forgery protection is disabled so live updates work through the ingress
+  proxy; the connection is still protected by Home Assistant authentication.
