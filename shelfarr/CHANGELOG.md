@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.1.2
+- Fixed CSS/JS 404s (`NS_ERROR_CORRUPTED_CONTENT`) and non-working buttons under ingress:
+  Rails' `Link: rel=preload` HTTP headers kept the bare base path (which the body-only
+  nginx `sub_filter` can't rewrite), so preloaded assets missed the ingress entry and 404'd.
+  Disabled `action_view.preload_links_header`; the rewritten `<link>`/`<script>` tags in the
+  body load assets correctly.
+
 ## 1.1.1
 - Fixed a blank ingress page: nginx/app redirects were being absolutized to the
   internal ingress port (`:8099`), causing the browser to hit an unexposed port
