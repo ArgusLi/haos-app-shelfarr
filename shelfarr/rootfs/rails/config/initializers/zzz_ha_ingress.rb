@@ -8,6 +8,7 @@
 Rails.application.configure do
   config.action_cable.disable_request_forgery_protection = true
 
+
   # Rails emits early-hint "Link: </shelfarr/assets/...>; rel=preload" HTTP headers for
   # stylesheets/scripts. The nginx sub_filter only rewrites response *bodies*, not headers,
   # so those preloads keep the bare base path (missing the ingress entry) and 404 under
@@ -35,4 +36,13 @@ Rails.application.config.after_initialize do
     ActionController::Base.default_url_options = { script_name: base }
     Rails.application.routes.default_url_options[:script_name] = base
   end
+
+  # HA ingress terminates TLS and proxies over http on an internal port, so the browser's
+  # Origin (https://homeassistant.local) never matches Rails' computed base_url
+  # (http://<host>:<ingress_port>). Rails' CSRF origin check then rejects every POST with a
+  # 422 (blank page). The authenticity token is still verified and HA authenticates the
+  # ingress connection, so disable only the origin comparison. Set on the class directly here
+  # (in after_initialize) because the framework overrides config.action_controller.* set
+  # earlier during boot.
+  ActionController::Base.forgery_protection_origin_check = false
 end
