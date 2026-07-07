@@ -22,3 +22,17 @@ Rails.application.configure do
   base = ENV.fetch("RAILS_RELATIVE_URL_ROOT", "").chomp("/")
   config.action_cable.url = "#{base}/cable" unless base.empty?
 end
+
+# Request-less renders — ActionController::Live streams (e.g. the search results stream),
+# jobs, and mailers — render without an HTTP request, so path helpers fall back to an empty
+# SCRIPT_NAME and emit URLs WITHOUT the base path (e.g. "/requests/new"), which escape the
+# ingress path and 404. Apply the base path as the default script_name so those renders match
+# normal in-request URL generation. In-request renders already carry SCRIPT_NAME, so this does
+# not double-prefix them.
+Rails.application.config.after_initialize do
+  base = ENV.fetch("RAILS_RELATIVE_URL_ROOT", "").chomp("/")
+  unless base.empty?
+    ActionController::Base.default_url_options = { script_name: base }
+    Rails.application.routes.default_url_options[:script_name] = base
+  end
+end
