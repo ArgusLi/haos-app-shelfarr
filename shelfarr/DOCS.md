@@ -60,3 +60,17 @@ This add-on supports both:
 - Because Shelfarr serves under `/shelfarr`, health is checked at `GET /shelfarr/up`.
 - ActionCable request-forgery protection is disabled so live updates work through the ingress
   proxy; the connection is still protected by Home Assistant authentication.
+
+### Notification deep-links and ingress
+
+Links that Shelfarr sends to **external** services (Discord / Telegram / webhook notifications
+that link back to a specific request) do **not** work reliably when Shelfarr is opened through
+**ingress**. Home Assistant's ingress URL uses a per-session token
+(`/api/hassio_ingress/<token>/…`) that rotates and is only valid inside the HA session, so it
+cannot be baked into a link that opens from an external app. This is a limitation of ingress
+itself, not something the add-on can work around.
+
+If you rely on clickable links in notifications, access Shelfarr via the **direct port**
+(`http://<HA-host>:5056/shelfarr/`), which is a stable URL, and Shelfarr will generate links
+against it. In-app notifications and the UI are unaffected — only outbound links to external
+chat/webhook services are impacted.

@@ -30,9 +30,27 @@ end
 # ingress path and 404. Apply the base path as the default script_name so those renders match
 # normal in-request URL generation. In-request renders already carry SCRIPT_NAME, so this does
 # not double-prefix them.
+Rails.application.config.to_prepare do
+  base = ENV.fetch("RAILS_RELATIVE_URL_ROOT", "").chomp("/")
+  unless base.empty?
+    # Controllers/views generate URLs via #url_options, which sets script_name to the
+    # request's SCRIPT_NAME. In request-less/streamed renders (ActionController::Live search
+    # results) that is empty, so path helpers emit base-less URLs like "/requests/new" that
+    # escape the ingress path and 404. (default_url_options does NOT help — url_options
+    # overrides script_name.) Force the base path here so every controller/view render — main
+    # thread or streaming thread — includes it. In-request renders already carry the same
+    # value, so this does not double-prefix.
+    ApplicationController.class_eval do
+      define_method(:url_options) { super().merge(script_name: base) }
+    end
+  end
+end
+
 Rails.application.config.after_initialize do
   base = ENV.fetch("RAILS_RELATIVE_URL_ROOT", "").chomp("/")
   unless base.empty?
+    # Belt-and-suspenders for request-less route-helper calls outside controllers
+    # (jobs, mailers) that use Rails.application.routes.url_helpers directly.
     ActionController::Base.default_url_options = { script_name: base }
     Rails.application.routes.default_url_options[:script_name] = base
   end

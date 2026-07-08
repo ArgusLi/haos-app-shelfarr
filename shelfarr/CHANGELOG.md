@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.1.5
+- Actually fixed base-less links from streamed renders (the search "Audiobook"/"Ebook"
+  request buttons). 1.1.3's default_url_options approach was ineffective because Rails'
+  `url_options` overrides script_name with the request's (empty in a streamed render). This
+  overrides `ApplicationController#url_options` to force the base path, so every controller/
+  view render — including ActionController::Live streams — emits `/shelfarr/...` URLs.
+  Verified against the live search stream endpoint (0 base-less links).
+
 ## 1.1.4
 - Fixed all POST requests (user sign-up/sign-in, forms) failing with a blank 422 page under
   ingress. HA terminates TLS and proxies over http on an internal port, so the browser's
