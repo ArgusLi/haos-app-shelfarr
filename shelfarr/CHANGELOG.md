@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.1.6
+- Stopped the ingress nginx `sub_filter` from corrupting file paths and text that merely
+  contain `/shelfarr` (e.g. a qBittorrent category folder `/downloads/shelfarr`, or output
+  paths like `/share/shelfarr/...`). It now only rewrites `/shelfarr/` when it begins a URL
+  value (right after a quote or paren), so links/assets/cable still resolve under ingress
+  while paths shown in settings and error messages stay intact.
+
 ## 1.1.5
 - Actually fixed base-less links from streamed renders (the search "Audiobook"/"Ebook"
   request buttons). 1.1.3's default_url_options approach was ineffective because Rails'

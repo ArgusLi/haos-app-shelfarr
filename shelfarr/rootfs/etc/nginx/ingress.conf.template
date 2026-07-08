@@ -42,10 +42,16 @@ server {
         proxy_redirect ~^(%%base_path%%/.*)$ %%ingress_entry%%$1;
 
         # Rewrite the fixed base path in response BODIES to the live ingress entry so
-        # all links/assets/cable URLs resolve under the HA ingress path.
+        # links/assets/cable URLs resolve under the HA ingress path. Anchor the match to the
+        # start of a URL value (right after a quote or paren) so we do NOT corrupt file paths
+        # or text that merely contain "/shelfarr" (e.g. "/downloads/shelfarr",
+        # "/share/shelfarr/...") — those are data, not links, and rewriting them mangles
+        # settings and error messages.
         proxy_set_header Accept-Encoding "";
         sub_filter_once off;
         sub_filter_types *;
-        sub_filter %%base_path%% %%ingress_entry%%%%base_path%%;
+        sub_filter '"%%base_path%%/' '"%%ingress_entry%%%%base_path%%/';
+        sub_filter "'%%base_path%%/" "'%%ingress_entry%%%%base_path%%/";
+        sub_filter '(%%base_path%%/' '(%%ingress_entry%%%%base_path%%/';
     }
 }
